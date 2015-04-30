@@ -1,13 +1,13 @@
 """ Muffin-Jinja2 -- Jinja2 template engine for Muffin framework. """
 import asyncio
+import json
 
 import jinja2
-import json
 from muffin.plugins import BasePlugin, PluginException
 from muffin.utils import to_coroutine
 
 
-__version__ = "0.0.6"
+__version__ = "0.0.0"
 __project__ = "muffin-jinja2"
 __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
