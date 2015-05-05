@@ -44,7 +44,7 @@ class Plugin(BasePlugin):
 
         self.options.template_folders = list(self.options.template_folders)
         if not self.options.loader:
-            self.options.loader = jinja2.FileSystemLoader(
+            self.options.loader = FileSystemLoader(
                 self.options.template_folders, encoding=self.options.encoding)
 
         self.context_processor(lambda: {'app': self.app})
@@ -97,3 +97,15 @@ class Plugin(BasePlugin):
         ctx.update(context)
 
         return template.render(**ctx)
+
+
+class FileSystemLoader(jinja2.FileSystemLoader):
+
+    """ Save searchpath by link. """
+
+    def __init__(self, searchpath, encoding='utf-8'):
+        """ Doesnt copy searchpath. """
+        if isinstance(searchpath, str):
+            searchpath = [searchpath]
+        self.searchpath = searchpath
+        self.encoding = encoding
