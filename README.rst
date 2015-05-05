@@ -74,10 +74,15 @@ Views
     def custom_context():
         return { 'VAR': 'VALUE' }
 
-    # Register a function into templates
+    # Register a function into global context
     @app.ps.jinja2.register
     def sum(a, b):
         return a + b
+
+    # Register a filter
+    @app.ps.jinja2.filter
+    def test(value, a, b=None):
+        return a if value else b
 
     @app.register('/')
     def index(request):

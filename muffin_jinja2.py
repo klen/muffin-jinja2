@@ -55,13 +55,11 @@ class Plugin(BasePlugin):
             loader=self.options.loader,
         )
 
+        @self.register
         @jinja2.contextfunction
         def debug(ctx):
-            return json.dumps({
-                name: str(value) for name, value in ctx.items()
-            }, indent=2)
-
-        self.env.globals['debug'] = debug
+            """ Debug current context to template. """
+            return json.dumps({name: str(value) for name, value in ctx.items()}, indent=2)
 
     def context_processor(self, func):
         """ Decorator for adding a context provider.
@@ -82,6 +80,16 @@ class Plugin(BasePlugin):
 
         if callable(func):
             self.env.globals[func.__name__] = func
+
+        return func
+
+    def filter(self, func):
+        """ Register function to filters. """
+        if self.env is None:
+            raise PluginException('The plugin must be installed to application.')
+
+        if callable(func):
+            self.env.filters[func.__name__] = func
 
         return func
 
