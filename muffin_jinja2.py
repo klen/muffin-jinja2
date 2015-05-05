@@ -1,6 +1,5 @@
 """ Muffin-Jinja2 -- Jinja2 template engine for Muffin framework. """
 import asyncio
-import json
 
 import jinja2
 from muffin.plugins import BasePlugin, PluginException
@@ -59,7 +58,7 @@ class Plugin(BasePlugin):
         @jinja2.contextfunction
         def debug(ctx):
             """ Debug current context to template. """
-            return json.dumps({name: str(value) for name, value in ctx.items()}, indent=2)
+            return jinja2.filters.do_pprint(ctx)
 
     def context_processor(self, func):
         """ Decorator for adding a context provider.
