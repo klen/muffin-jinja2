@@ -79,10 +79,20 @@ Views
     def sum(a, b):
         return a + b
 
+    # Register a function with a different name
+    @app.ps.jinja2.register('div')
+    def mod(a, b):
+        return a // b
+
     # Register a filter
     @app.ps.jinja2.filter
     def test(value, a, b=None):
         return a if value else b
+
+    # Register a filter with a different name
+    @app.ps.jinja2.filter('bool')
+    def boolean(value):
+        return bool(value)
 
     @app.register('/')
     def index(request):

@@ -72,25 +72,41 @@ class Plugin(BasePlugin):
         self.providers.append(func)
         return func
 
-    def register(self, func):
+    def register(self, value):
         """ Register function to globals. """
         if self.env is None:
             raise PluginException('The plugin must be installed to application.')
 
-        if callable(func):
-            self.env.globals[func.__name__] = func
+        def wrapper(func):
+            name = func.__name__
+            if isinstance(value, str):
+                name = value
+            if callable(func):
+                self.env.globals[name] = func
+            return func
 
-        return func
+        if callable(value):
+            return wrapper(value)
 
-    def filter(self, func):
+        return value
+
+    def filter(self, value):
         """ Register function to filters. """
         if self.env is None:
             raise PluginException('The plugin must be installed to application.')
 
-        if callable(func):
-            self.env.filters[func.__name__] = func
+        def wrapper(func):
+            name = func.__name__
+            if isinstance(value, str):
+                name = value
+            if callable(func):
+                self.env.filters[name] = func
+            return func
 
-        return func
+        if callable(value):
+            return wrapper(value)
+
+        return value
 
     @asyncio.coroutine
     def render(self, path, **context):

@@ -18,6 +18,10 @@ def app(loop):
     def sum(a, b):
         return a + b
 
+    @app.ps.jinja2.register('div')
+    def _div_(a, b):
+        return a // b
+
     @app.ps.jinja2.filter
     def test(test, a, b=None):
         return a if test else b
@@ -37,6 +41,7 @@ def test_muffin_jinja2(app, client):
     response = client.get('/', {'name': 'jinja2'})
     assert '<h1>Hello jinja2!</h1>' in response.text
     assert '<p>8</p>' in response.text
+    assert '<p>3</p>' in response.text
     assert '<b>done</b>' in response.text
     assert '<i>yes</i>' in response.text
     assert '<Application: jinja2>' in response.text
