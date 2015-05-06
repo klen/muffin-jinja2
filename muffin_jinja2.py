@@ -88,7 +88,7 @@ class Plugin(BasePlugin):
         if callable(value):
             return wrapper(value)
 
-        return value
+        return wrapper
 
     def filter(self, value):
         """ Register function to filters. """
@@ -106,7 +106,7 @@ class Plugin(BasePlugin):
         if callable(value):
             return wrapper(value)
 
-        return value
+        return wrapper
 
     @asyncio.coroutine
     def render(self, path, **context):
