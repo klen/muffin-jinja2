@@ -56,9 +56,9 @@ class Plugin(BasePlugin):
 
         @self.register
         @jinja2.contextfunction
-        def debug(ctx):
+        def debug(ctx, value=None):
             """ Debug current context to template. """
-            return jinja2.filters.do_pprint(ctx)
+            return jinja2.filters.do_pprint(value is None and ctx or value)
 
     def context_processor(self, func):
         """ Decorator for adding a context provider.
