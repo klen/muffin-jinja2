@@ -1,6 +1,7 @@
 """ Muffin-Jinja2 -- Jinja2 template engine for Muffin framework. """
 import asyncio
 
+import pprint
 import jinja2
 from muffin.plugins import BasePlugin, PluginException
 from muffin.utils import to_coroutine
@@ -32,6 +33,7 @@ class Plugin(BasePlugin):
 
         self.env = None
         self.providers = []
+        self.receivers = []
         self.functions = {}
 
     def setup(self, app):
@@ -115,9 +117,12 @@ class Plugin(BasePlugin):
 
         ctx = dict()
         for provider in self.providers:
-            _ctx = yield from provider()
-            ctx.update(_ctx)
+            ctx_ = yield from provider()
+            ctx.update(ctx_)
         ctx.update(context)
+
+        for reciever in self.receivers:
+            reciever(path, ctx)
 
         return template.render(**ctx)
 
@@ -132,3 +137,58 @@ class FileSystemLoader(jinja2.FileSystemLoader):
             searchpath = [searchpath]
         self.searchpath = searchpath
         self.encoding = encoding
+
+
+try:
+    import muffin_debugtoolbar as md
+
+    class DebugPanel(md.panels.DebugPanel):
+
+        """ Integration to debug panel. """
+
+        name = 'Jinja2'
+        template = jinja2.Template("""
+            {% for path, context in templates %}
+                <div class="panel panel-default">
+                        <div class="panel-heading"
+                            style="cursor:pointer"
+                            data-toggle="collapse" data-target="#template-{{loop.index}}">
+                                <a href="#template-{{loop.index}}">{{path}}</a></div>
+                    <div class="panel-body collapse" id="template-{{loop.index}}">
+                        <code>{{ context|escape }}</code>
+                    </div>
+                </div>
+            {% endfor %}
+        """)
+
+        def __init__(self, app, request=None):
+            """ Initialize the plugin. """
+            super(DebugPanel, self).__init__(app, request)
+            self.templates = []
+
+        def wrap_handler(self, handler, context_switcher):
+            """ Wrap handler. """
+            def render(path, context):
+                self.templates.append(
+                    (path, pprint.pformat(context, indent=2, width=120, depth=5)))
+
+            context_switcher.add_context_in(
+                lambda: self.app.ps.jinja2.receivers.append(render))
+            context_switcher.add_context_out(
+                lambda: self.app.ps.jinja2.receivers.remove(render))
+
+            return handler
+
+        @property
+        def has_content(self):
+            """ Mark the panel has content. """
+            return self.templates
+
+        def render_vars(self):
+            """ Get template variables. """
+            return {
+                'templates': self.templates
+            }
+
+except ImportError:
+    pass
