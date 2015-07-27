@@ -40,20 +40,20 @@ class Plugin(BasePlugin):
         """ Setup the plugin from an application. """
         super().setup(app)
 
-        if isinstance(self.options.template_folders, str):
-            self.options.template_folders = [self.options.template_folders]
+        if isinstance(self.cfg.template_folders, str):
+            self.cfg.template_folders = [self.cfg.template_folders]
 
-        self.options.template_folders = list(self.options.template_folders)
-        if not self.options.loader:
-            self.options.loader = FileSystemLoader(
-                self.options.template_folders, encoding=self.options.encoding)
+        self.cfg.template_folders = list(self.cfg.template_folders)
+        if not self.cfg.loader:
+            self.cfg.loader = FileSystemLoader(
+                self.cfg.template_folders, encoding=self.cfg.encoding)
 
         self.context_processor(lambda: {'app': self.app})
         self.env = jinja2.Environment(
-            auto_reload=self.options.auto_reload,
-            cache_size=self.options.cache_size,
-            extensions=self.options.extensions,
-            loader=self.options.loader,
+            auto_reload=self.cfg.auto_reload,
+            cache_size=self.cfg.cache_size,
+            extensions=self.cfg.extensions,
+            loader=self.cfg.loader,
         )
 
         @self.register
@@ -174,6 +174,7 @@ try:
 
             context_switcher.add_context_in(
                 lambda: self.app.ps.jinja2.receivers.append(render))
+
             context_switcher.add_context_out(
                 lambda: self.app.ps.jinja2.receivers.remove(render))
 
