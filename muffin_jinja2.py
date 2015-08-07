@@ -155,7 +155,7 @@ try:
                             data-toggle="collapse" data-target="#template-{{loop.index}}">
                                 <a href="#template-{{loop.index}}">{{path}}</a></div>
                     <div class="panel-body collapse" id="template-{{loop.index}}">
-                        <code>{{ context|escape }}</code>
+                        <pre>{{ context|escape }}</pre>
                     </div>
                 </div>
             {% endfor %}
