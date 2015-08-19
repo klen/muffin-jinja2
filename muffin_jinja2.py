@@ -1,10 +1,11 @@
 """ Muffin-Jinja2 -- Jinja2 template engine for Muffin framework. """
 import asyncio
-
 import pprint
+
 import jinja2
 from muffin.plugins import BasePlugin, PluginException
 from muffin.utils import to_coroutine
+from ujson import dumps
 
 
 __version__ = "0.0.11"
@@ -61,6 +62,10 @@ class Plugin(BasePlugin):
         def debug(ctx, value=None):
             """ Debug current context to template. """
             return jinja2.filters.do_pprint(value is None and ctx or value)
+
+        @self.filter
+        def jsonify(obj):
+            return dumps(obj, ensure_ascii=False, encode_html_chars=True)
 
     def context_processor(self, func):
         """ Decorator for adding a context provider.
