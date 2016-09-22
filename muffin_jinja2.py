@@ -28,14 +28,14 @@ class Plugin(BasePlugin):
         template_folders=('templates',),
     )
 
-    def __init__(self, **options):
+    def __init__(self, app=None, **options):
         """ Initialize the plugin. """
-        super().__init__(**options)
-
         self.env = None
         self.providers = []
         self.receivers = []
         self.functions = {}
+
+        super().__init__(app, **options)
 
     def setup(self, app):
         """ Setup the plugin from an application. """
