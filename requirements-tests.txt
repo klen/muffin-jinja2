@@ -1,5 +1,5 @@
 -r requirements.txt
 -e .
 
-pytest
+pytest==3.0.3
 webtest
