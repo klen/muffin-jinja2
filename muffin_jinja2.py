@@ -26,6 +26,7 @@ class Plugin(BasePlugin):
         loader=None,
         encoding='utf-8',
         template_folders=('templates',),
+        enable_async=False,
     )
 
     def __init__(self, **options):
@@ -55,6 +56,7 @@ class Plugin(BasePlugin):
             cache_size=self.cfg.cache_size,
             extensions=self.cfg.extensions,
             loader=self.cfg.loader,
+            enable_async=self.cfg.enable_async,
         )
 
         @self.register
@@ -115,21 +117,49 @@ class Plugin(BasePlugin):
 
         return wrapper
 
+    def update_receivers(self, context):
+        for receivers in self.receivers:
+            receivers(path, context)
+
+    @asyncio.coroutine
+    def get_updated_context(self, context):
+        updated_context = {**context}
+
+        provider_contexts = yield from asyncio.gather(*[
+            provider() for provider in self.providers
+        ])
+
+        for provider_context in provider_contexts:
+            updated_context.update(provider_context)
+
+        return updated_context
+
     @asyncio.coroutine
     def render(self, path, **context):
         """ Render a template with context. """
         template = self.env.get_template(path)
+        updated_context = yield from self.get_updated_context(context)
+        self.update_receivers(updated_context)
+ 
+        return template.render(**updated_context)
 
-        ctx = dict()
-        for provider in self.providers:
-            ctx_ = yield from provider()
-            ctx.update(ctx_)
-        ctx.update(context)
+    @asyncio.coroutine
+    def render_async(self, path, **context):
+        """ Async render a template with context. """
+        template = self.env.get_template(path)
+        updated_context = yield from self.get_updated_context(context)
+        self.update_receivers(updated_context)
 
-        for reciever in self.receivers:
-            reciever(path, ctx)
+        return template.render_async(**updated_context)
 
-        return template.render(**ctx)
+    @asyncio.coroutine
+    def generate_async(self, path, **context):
+        """ Async generate a template with context. """
+        template = self.env.get_template(path)
+        updated_context = yield from self.get_updated_context(context)
+        self.update_receivers(updated_context)
+
+        return template.generate_async(**updated_context)
 
 
 class FileSystemLoader(jinja2.FileSystemLoader):
