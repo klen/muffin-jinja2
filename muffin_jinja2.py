@@ -135,31 +135,22 @@ class Plugin(BasePlugin):
         return updated_context
 
     @asyncio.coroutine
-    def render(self, path, **context):
-        """ Render a template with context. """
+    def render_template(self, render_method, path, **context):
         template = self.env.get_template(path)
         updated_context = yield from self.get_updated_context(context)
         self.update_receivers(updated_context)
- 
-        return template.render(**updated_context)
+
+        return getattr(template, render_method)(**updated_context)
+
+    @asyncio.coroutine
+    def render(self, path, **context):
+        """ Render a template with context. """
+        return (yield from self.render_template('render', path, **context))
 
     @asyncio.coroutine
     def render_async(self, path, **context):
         """ Async render a template with context. """
-        template = self.env.get_template(path)
-        updated_context = yield from self.get_updated_context(context)
-        self.update_receivers(updated_context)
-
-        return template.render_async(**updated_context)
-
-    @asyncio.coroutine
-    def generate_async(self, path, **context):
-        """ Async generate a template with context. """
-        template = self.env.get_template(path)
-        updated_context = yield from self.get_updated_context(context)
-        self.update_receivers(updated_context)
-
-        return template.generate_async(**updated_context)
+        return (yield from self.render_template('render_async', path, **context))
 
 
 class FileSystemLoader(jinja2.FileSystemLoader):
