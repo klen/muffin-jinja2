@@ -68,7 +68,7 @@ class Plugin(BasePlugin):
             return dumps(obj, ensure_ascii=False, encode_html_chars=True)
 
     def context_processor(self, func):
-        """ Decorator for adding a context provider.
+        """ Decorate a given function to use as a context processor.
 
         ::
             @app.ps.jinja2.context_processor

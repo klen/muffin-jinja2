@@ -3,48 +3,48 @@ import pytest
 
 
 @pytest.fixture(scope='session')
-def app(loop):
-    app = muffin.Application(
-        'jinja2', loop=loop,
+def app():
+    app = muffin.Application('jinja2', JINJA2_TEMPLATE_FOLDERS='tests')
+    jinja2 = app.install('muffin_jinja2')
 
-        JINJA2_TEMPLATE_FOLDERS='tests',
-        PLUGINS=['muffin_jinja2'])
-
-    @app.ps.jinja2.context_processor
+    @jinja2.context_processor
     def global_context():
         return {'global': 'done'}
 
-    @app.ps.jinja2.register
+    @jinja2.register
     def sum(a, b):
         return a + b
 
-    @app.ps.jinja2.register('div')
+    @jinja2.register('div')
     def _div_(a, b):
         return a // b
 
-    @app.ps.jinja2.filter
+    @jinja2.filter
     def test(test, a, b=None):
         return a if test else b
 
     @app.register('/')
     def index(request):
-        return app.ps.jinja2.render('template.html', **request.GET)
+        return jinja2.render('template.html', **request.query)
 
     @app.register('/unknown')
     def unknown(request):
-        return app.ps.jinja2.render('unknown.html', **request.GET)
+        return jinja2.render('unknown.html', **request.query)
 
     return app
 
 
-def test_muffin_jinja2(app, client):
-    response = client.get('/', {'name': 'jinja2'})
-    assert '<h1>Hello jinja2!</h1>' in response.text
-    assert '<p>8</p>' in response.text
-    assert '<p>3</p>' in response.text
-    assert '<b>done</b>' in response.text
-    assert '<i>yes</i>' in response.text
-    assert '<Application: jinja2>' in response.text
+async def test_muffin_jinja2(client):
+    async with client.get('/', params={'name': 'jinja2'}) as resp:
+        assert resp.status == 200
+        text = await resp.text()
 
-    with pytest.raises(Exception):
-        client.get('/unknown')
+    assert '<h1>Hello jinja2!</h1>' in text
+    assert '<p>8</p>' in text
+    assert '<p>3</p>' in text
+    assert '<b>done</b>' in text
+    assert '<i>yes</i>' in text
+    assert '<Application: jinja2>' in text
+
+    async with client.get('/unknown') as resp:
+        assert resp.status == 500
