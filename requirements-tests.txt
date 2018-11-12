@@ -2,4 +2,4 @@
 -e .
 
 pytest
-webtest
+webtest==2.0.32
