@@ -49,13 +49,13 @@ class Plugin(BasePlugin):
             self.cfg.loader = FileSystemLoader(
                 self.cfg.template_folders, encoding=self.cfg.encoding)
 
-        self.context_processor(lambda: {'app': self.app})
         self.env = jinja2.Environment(
             auto_reload=self.cfg.auto_reload,
             cache_size=self.cfg.cache_size,
             extensions=self.cfg.extensions,
             loader=self.cfg.loader,
         )
+        self.env.globals['app'] = app
 
         @self.register
         @jinja2.contextfunction
