@@ -2,4 +2,3 @@
 -e .
 
 pytest
-webtest
