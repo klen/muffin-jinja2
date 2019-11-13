@@ -4,7 +4,7 @@ import pprint
 
 import jinja2
 from muffin.plugins import BasePlugin, PluginException
-from muffin.utils import to_coroutine, json
+from muffin.utils import to_coroutine, dumps as jsonify
 
 
 __version__ = "0.2.5"
@@ -62,9 +62,7 @@ class Plugin(BasePlugin):
             """ Debug current context to template. """
             return jinja2.filters.do_pprint(value is None and ctx or value)
 
-        @self.filter
-        def jsonify(obj):
-            return json.dumps(obj)
+        self.filter(jsonify)
 
     def context_processor(self, func):
         """ Decorate a given function to use as a context processor.
