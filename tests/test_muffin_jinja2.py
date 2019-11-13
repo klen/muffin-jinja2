@@ -34,7 +34,7 @@ def app():
     return app
 
 
-async def test_muffin_jinja2(client):
+async def test_muffin_jinja2(app, client):
     async with client.get('/', params={'name': 'jinja2'}) as resp:
         assert resp.status == 200
         text = await resp.text()

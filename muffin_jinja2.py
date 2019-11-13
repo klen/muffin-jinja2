@@ -1,10 +1,11 @@
 """ Muffin-Jinja2 -- Jinja2 template engine for Muffin framework. """
 import asyncio
 import pprint
+import json
 
 import jinja2
 from muffin.plugins import BasePlugin, PluginException
-from muffin.utils import to_coroutine, json
+from muffin.utils import to_coroutine
 
 
 __version__ = "0.2.3"
