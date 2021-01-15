@@ -6,7 +6,7 @@ from muffin.plugin import BasePlugin, PluginException
 from muffin.utils import to_awaitable
 
 
-__version__ = "0.2.7"
+__version__ = "0.3.0"
 __project__ = "muffin-jinja2"
 __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
