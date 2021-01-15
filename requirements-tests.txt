@@ -2,5 +2,5 @@
 -e .
 
 anyio
-trio
+trio==0.18.0
 pytest
