@@ -1,5 +1,5 @@
 -r requirements.txt
 -e .
 
-anyio
+anyio==2.0.2
 pytest
