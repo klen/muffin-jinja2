@@ -3,7 +3,7 @@ Muffin-Jinja2
 
 .. _description:
 
-**Muffin-Jinja2** -- Support Jinja2 templates for Muffin Framework
+**Muffin-Jinja2** -- Support Jinja2 templates for Muffin_ Framework
 
 .. _badges:
 
@@ -167,5 +167,6 @@ Licensed under a `MIT license`_.
 
 
 .. _klen: https://github.com/klen
+.. _Muffin: https://github.com/klen/muffin
 
 .. _MIT license: http://opensource.org/licenses/MIT
