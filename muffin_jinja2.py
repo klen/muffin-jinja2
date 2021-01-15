@@ -1,10 +1,9 @@
 """ Muffin-Jinja2 -- Jinja2 template engine for Muffin framework. """
-import asyncio
-import pprint
-
 import jinja2
-from muffin.plugins import BasePlugin, PluginException
-from muffin.utils import to_coroutine, dumps
+from json import dumps
+
+from muffin.plugin import BasePlugin, PluginException
+from muffin.utils import to_awaitable
 
 
 __version__ = "0.2.7"
@@ -18,14 +17,14 @@ class Plugin(BasePlugin):
     """ The class is used to control the jinja2 integration to Muffin application. """
 
     name = 'jinja2'
-    defaults = dict(
-        auto_reload=False,
-        cache_size=50,
-        extensions=(),
-        loader=None,
-        encoding='utf-8',
-        template_folders=('templates',),
-    )
+    defaults = {
+        'auto_reload': False,
+        'cache_size': 50,
+        'extensions': (),
+        'loader': None,
+        'encoding': 'utf-8',
+        'template_folders': ['templates'],
+    }
 
     def __init__(self, app=None, **options):
         """ Initialize the plugin. """
@@ -36,9 +35,9 @@ class Plugin(BasePlugin):
 
         super().__init__(app, **options)
 
-    def setup(self, app):
-        """ Setup the plugin from an application. """
-        super().setup(app)
+    def init(self, app, **options):
+        """Init the plugin from an application."""
+        super().init(app, **options)
 
         if isinstance(self.cfg.template_folders, str):
             self.cfg.template_folders = [self.cfg.template_folders]
@@ -70,11 +69,11 @@ class Plugin(BasePlugin):
         """ Decorate a given function to use as a context processor.
 
         ::
-            @app.ps.jinja2.context_processor
+            @jinja2.context_processor
             def my_context():
                 return {...}
         """
-        func = to_coroutine(func)
+        func = to_awaitable(func)
         self.providers.append(func)
         return func
 
@@ -114,14 +113,13 @@ class Plugin(BasePlugin):
 
         return wrapper
 
-    @asyncio.coroutine
-    def render(self, path, **context):
+    async def render(self, path, **context):
         """ Render a template with context. """
         template = self.env.get_template(path)
 
         ctx = dict()
         for provider in self.providers:
-            ctx_ = yield from provider()
+            ctx_ = await provider()
             ctx.update(ctx_)
         ctx.update(context)
 
@@ -141,59 +139,3 @@ class FileSystemLoader(jinja2.FileSystemLoader):
             searchpath = [searchpath]
         self.searchpath = searchpath
         self.encoding = encoding
-
-
-try:
-    import muffin_debugtoolbar as md
-
-    class DebugPanel(md.panels.DebugPanel):
-
-        """ Integration to debug panel. """
-
-        name = 'Jinja2'
-        template = jinja2.Template("""
-            {% for path, context in templates %}
-                <div class="panel panel-default">
-                        <div class="panel-heading"
-                            style="cursor:pointer"
-                            data-toggle="collapse" data-target="#template-{{loop.index}}">
-                                <a href="#template-{{loop.index}}">{{path}}</a></div>
-                    <div class="panel-body collapse" id="template-{{loop.index}}">
-                        <pre>{{ context|escape }}</pre>
-                    </div>
-                </div>
-            {% endfor %}
-        """)
-
-        def __init__(self, app, request=None):
-            """ Initialize the plugin. """
-            super(DebugPanel, self).__init__(app, request)
-            self.templates = []
-
-        def wrap_handler(self, handler, context_switcher):
-            """ Wrap handler. """
-            def render(path, context):
-                self.templates.append(
-                    (path, pprint.pformat(context, indent=2, width=120, depth=5)))
-
-            context_switcher.add_context_in(
-                lambda: self.app.ps.jinja2.receivers.append(render))
-
-            context_switcher.add_context_out(
-                lambda: self.app.ps.jinja2.receivers.remove(render))
-
-            return handler
-
-        @property
-        def has_content(self):
-            """ Mark the panel has content. """
-            return self.templates
-
-        def render_vars(self):
-            """ Get template variables. """
-            return {
-                'templates': self.templates
-            }
-
-except ImportError:
-    pass

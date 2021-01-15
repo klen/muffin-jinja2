@@ -3,7 +3,7 @@ Muffin-Jinja2
 
 .. _description:
 
-Muffin-Jinja2 -- Jinja2 template engine for Muffin framework.
+Muffin-Jinja2 -- Support Jinja2 templates for Muffin Framework
 
 .. _badges:
 
@@ -30,7 +30,7 @@ Muffin-Jinja2 -- Jinja2 template engine for Muffin framework.
 Requirements
 =============
 
-- python >= 3.3
+- python >= 3.8
 
 .. _installation:
 

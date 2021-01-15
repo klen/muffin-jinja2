@@ -4,8 +4,11 @@ import pytest
 
 @pytest.fixture(scope='session')
 def app():
-    app = muffin.Application('jinja2', JINJA2_TEMPLATE_FOLDERS='tests')
-    jinja2 = app.install('muffin_jinja2')
+    from muffin_jinja2 import Plugin as Jinja2
+
+    app = muffin.Application('jinja2', jinja2_template_folders=['tests'])
+    jinja2 = Jinja2(app)
+    assert jinja2.cfg.template_folders == ['tests']
 
     @jinja2.context_processor
     def global_context():
@@ -23,28 +26,30 @@ def app():
     def test(test, a, b=None):
         return a if test else b
 
-    @app.register('/')
-    def index(request):
-        return jinja2.render('template.html', **request.query)
+    @app.route('/')
+    async def index(request):
+        return await jinja2.render('template.html', **request.query)
 
-    @app.register('/unknown')
-    def unknown(request):
-        return jinja2.render('unknown.html', **request.query)
+    @app.route('/unknown')
+    async def unknown(request):
+        return await jinja2.render('unknown.html', **request.query)
 
     return app
 
 
 async def test_muffin_jinja2(app, client):
-    async with client.get('/', params={'name': 'jinja2'}) as resp:
-        assert resp.status == 200
-        text = await resp.text()
+    res = await client.get('/', query={'name': 'jinja2'})
+    assert res.status_code == 200
 
-    assert '<h1>Hello jinja2!</h1>' in text
-    assert '<p>8</p>' in text
-    assert '<p>3</p>' in text
-    assert '<b>done</b>' in text
-    assert '<i>yes</i>' in text
-    assert '<Application: jinja2>' in text
+    assert '<h1>Hello jinja2!</h1>' in res.text
+    assert '<p>8</p>' in res.text
+    assert '<p>3</p>' in res.text
+    assert '<b>done</b>' in res.text
+    assert '<i>yes</i>' in res.text
+    assert '<muffin.Application: jinja2>' in res.text
 
-    async with client.get('/unknown') as resp:
-        assert resp.status == 500
+    res = await client.get('/unknown')
+    assert res.status_code == 500
+
+
+# pylama:ignore=D
