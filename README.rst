@@ -3,23 +3,17 @@ Muffin-Jinja2
 
 .. _description:
 
-Muffin-Jinja2 -- Support Jinja2 templates for Muffin Framework
+**Muffin-Jinja2** -- Support Jinja2 templates for Muffin Framework
 
 .. _badges:
 
-.. image:: http://img.shields.io/travis/klen/muffin-jinja2.svg?style=flat-square
-    :target: http://travis-ci.org/klen/muffin-jinja2
-    :alt: Build Status
+.. image:: https://github.com/klen/muffin-jinja2/workflows/tests/badge.svg
+    :target: https://github.com/klen/muffin-jinja2/actions
+    :alt: Tests Status
 
-.. image:: http://img.shields.io/pypi/v/muffin-jinja2.svg?style=flat-square
-    :target: https://pypi.python.org/pypi/muffin-jinja2
-
-.. image:: http://img.shields.io/pypi/dm/muffin-jinja2.svg?style=flat-square
-    :target: https://pypi.python.org/pypi/muffin-jinja2
-
-.. image:: http://img.shields.io/gratipay/klen.svg?style=flat-square
-    :target: https://www.gratipay.com/klen/
-    :alt: Donate
+.. image:: https://img.shields.io/pypi/v/muffin-jinja2
+    :target: https://pypi.org/project/muffin-jinja2/
+    :alt: PYPI Version
 
 .. _contents:
 
@@ -46,59 +40,98 @@ Installation
 Usage
 =====
 
-Add **muffin_jinja2** to **PLUGINS** in your Muffin Application configuration.
+.. code-block:: python
+
+    from muffin import Application
+    from muffin_jinja2 import Plugin as Jinja2
+
+    # Create Muffin Application
+    app = Application('example')
+
+    # Initialize the plugin
+    # As alternative: jinja2 = Jinja2(app, **options)
+    jinja2 = Jinja2()
+    jinja2.init(app, template_folders=['src/templates'])
+
+    # Use it inside your handlers
+    @app.route('/')
+    async def index(request):
+        context = {'var': 42}
+        return await jinja2.render('index.html', **context)
+
 
 Options
 -------
 
-**JINJA2_AUTO_RELOAD** -- Auto reload changed templates (False)
+Format: Name -- Description (default value)
 
-**JINJA2_CACHE_SIZE** -- Cache templates (50)
+**auto_reload** -- Auto reload changed templates (False)
 
-**JINJA2_EXTENSIONS** -- Enable Jinja2 Extensions (None)
+**cache_size** -- Cache templates (50)
 
-**JINJA2_LOADER** -- Template loader (FileSystemLoader)
+**extensions** -- Enable Jinja2 Extensions (None)
 
-**JINJA2_ENCODING** -- Default encoding for file loader
+**loader** -- Template loader (FileSystemLoader)
 
-**JINJA2_TEMPLATE_FOLDERS** -- List of template folders (['templates'])
+**encoding** -- Default encoding for file loader (utf-8)
 
-Views
------
+**template_folders** -- List of template folders (['templates'])
 
-::
+
+You are able to provide the options when you are initiliazing the plugin:
+
+.. code-block:: python
+
+    jinja2.init(app, template_folders=['src/templates'], auto_reload=True)
+
+
+Or setup it inside `Muffin.Application` config using the `jinja2_` prefix:
+
+.. code-block:: python
+
+   JINJA2_AUTO_RELOAD = True
+
+   JINJA2_TEMPLATE_FOLDERS = ['tmpls']
+
+`Muffin.Application` configuration options are case insensetive
+
+
+Tunning
+-------
+
+.. code-block:: python
 
     # Register custom context processor
     # could be a function/coroutine
-    @app.ps.jinja2.context_processor
+    @jinja2.context_processor
     def custom_context():
         return { 'VAR': 'VALUE' }
 
     # Register a function into global context
-    @app.ps.jinja2.register
+    @jinja2.register
     def sum(a, b):
         return a + b
 
     # Register a function with a different name
-    @app.ps.jinja2.register('div')
+    @jinja2.register('div')
     def mod(a, b):
         return a // b
 
     # Register a filter
-    @app.ps.jinja2.filter
+    @jinja2.filter
     def test(value, a, b=None):
         return a if value else b
 
     # Register a filter with a different name
-    @app.ps.jinja2.filter('bool')
+    @jinja2.filter('bool')
     def boolean(value):
         return bool(value)
 
-    @app.register('/')
-    def index(request):
+    @app.route('/')
+    async def index(request):
         """ Check for user is admin. """
         local_context = {'key': 'value'}
-        return app.ps.jinja2.render('index.html', **local_context)
+        return await jinja2.render('index.html', **local_context)
 
 
 .. _bugtracker:
