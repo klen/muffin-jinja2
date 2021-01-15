@@ -2,4 +2,5 @@
 -e .
 
 anyio
+trio
 pytest
