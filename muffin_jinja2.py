@@ -35,9 +35,9 @@ class Plugin(BasePlugin):
 
         super().__init__(app, **options)
 
-    def init(self, app, **options):
-        """Init the plugin from an application."""
-        super().init(app, **options)
+    def setup(self, app, **options):
+        """Init the plugin for the given application."""
+        super().setup(app, **options)
 
         if isinstance(self.cfg.template_folders, str):
             self.cfg.template_folders = [self.cfg.template_folders]
