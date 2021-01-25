@@ -35,7 +35,7 @@ class Plugin(BasePlugin):
         """ Initialize the plugin. """
         self.env: t.Optional[jinja2.Environment] = None
         self.providers: t.List[t.Callable[[], t.Awaitable]] = []
-        self.receivers: t.List[t.Callable[[str, t.Dict], t.Any]] = []
+        self.receivers: t.List[t.Callable[[t.Union[str, jinja2.Template], t.Dict], t.Any]] = []
 
         super().__init__(app, **options)
 
@@ -112,12 +112,13 @@ class Plugin(BasePlugin):
 
         return wrapper
 
-    async def render(self, path: str, **context) -> str:
+    async def render(self, path: t.Union[str, jinja2.Template], **context) -> str:
         """ Render a template with context. """
         if self.env is None:
             raise PluginException('Initialize the plugin first.')
 
-        template = self.env.get_template(path)
+        if isinstance(path, str):
+            template = self.env.get_template(path)
 
         ctx = dict()
         for provider in self.providers:
