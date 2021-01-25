@@ -42,8 +42,8 @@ Usage
 
 .. code-block:: python
 
-    from muffin import Application
-    from muffin_jinja2 import Plugin as Jinja2
+    import muffin
+    import muffin_jinja2
 
     # Create Muffin Application
     app = Application('example')
@@ -51,7 +51,7 @@ Usage
     # Initialize the plugin
     # As alternative: jinja2 = Jinja2(app, **options)
     jinja2 = Jinja2()
-    jinja2.init(app, template_folders=['src/templates'])
+    jinja2.setup(app, template_folders=['src/templates'])
 
     # Use it inside your handlers
     @app.route('/')
@@ -159,7 +159,7 @@ Contributors
 .. _license:
 
 License
-=======
+========
 
 Licensed under a `MIT license`_.
 
