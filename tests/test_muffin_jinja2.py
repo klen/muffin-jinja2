@@ -1,5 +1,6 @@
 import muffin
 import pytest
+import jinja2
 
 
 @pytest.fixture(scope='session')
@@ -50,6 +51,10 @@ async def test_muffin_jinja2(app, client):
 
     res = await client.get('/unknown')
     assert res.status_code == 500
+
+    plugin = app.plugins['jinja2']
+
+    assert await plugin.render(jinja2.Template('OK'))
 
 
 # pylama:ignore=D

@@ -117,9 +117,7 @@ class Plugin(BasePlugin):
         if self.env is None:
             raise PluginException('Initialize the plugin first.')
 
-        if isinstance(path, str):
-            template = self.env.get_template(path)
-
+        template = self.env.get_template(path) if isinstance(path, str) else path
         ctx = dict()
         for provider in self.providers:
             ctx_ = await provider()
