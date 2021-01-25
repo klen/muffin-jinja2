@@ -65,7 +65,12 @@ $(VIRTUAL_ENV): setup.cfg
 	@$(VIRTUAL_ENV)/bin/pip install -e .[tests,build]
 	@touch $(VIRTUAL_ENV)
 
-.PHONY: test
+.PHONY: t test
 # target: test - Runs tests
 t test: $(VIRTUAL_ENV)
 	@$(VIRTUAL_ENV)/bin/py.test tests
+
+.PHONY: mypy
+# target: mypy - Check types
+mypy: $(VIRTUAL_ENV)
+	@$(VIRTUAL_ENV)/bin/mypy muffin_jinja2
