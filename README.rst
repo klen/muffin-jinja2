@@ -46,11 +46,11 @@ Usage
     import muffin_jinja2
 
     # Create Muffin Application
-    app = Application('example')
+    app = muffin.Application('example')
 
     # Initialize the plugin
     # As alternative: jinja2 = Jinja2(app, **options)
-    jinja2 = Jinja2()
+    jinja2 = muffin_jinja2.Plugin()
     jinja2.setup(app, template_folders=['src/templates'])
 
     # Use it inside your handlers
