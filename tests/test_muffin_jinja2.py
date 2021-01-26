@@ -42,12 +42,13 @@ async def test_muffin_jinja2(app, client):
     res = await client.get('/', query={'name': 'jinja2'})
     assert res.status_code == 200
 
-    assert '<h1>Hello jinja2!</h1>' in res.text
-    assert '<p>8</p>' in res.text
-    assert '<p>3</p>' in res.text
-    assert '<b>done</b>' in res.text
-    assert '<i>yes</i>' in res.text
-    assert '<muffin.Application: jinja2>' in res.text
+    text = await res.text()
+    assert '<h1>Hello jinja2!</h1>' in text
+    assert '<p>8</p>' in text
+    assert '<p>3</p>' in text
+    assert '<b>done</b>' in text
+    assert '<i>yes</i>' in text
+    assert '<muffin.Application: jinja2>' in text
 
     res = await client.get('/unknown')
     assert res.status_code == 500
