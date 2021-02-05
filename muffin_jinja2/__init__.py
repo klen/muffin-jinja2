@@ -8,7 +8,7 @@ from muffin.plugin import BasePlugin, PluginException
 from muffin.utils import to_awaitable
 
 
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 __project__ = "muffin-jinja2"
 __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
