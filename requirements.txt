@@ -1,2 +1,2 @@
-muffin              >= 0.40
+muffin              >= 0.48.2
 jinja2              >= 2.10

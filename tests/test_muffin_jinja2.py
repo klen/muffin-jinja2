@@ -29,11 +29,11 @@ def app():
 
     @app.route('/')
     async def index(request):
-        return await jinja2.render('template.html', **request.query)
+        return await jinja2.render('template.html', **request.url.query)
 
     @app.route('/unknown')
     async def unknown(request):
-        return await jinja2.render('unknown.html', **request.query)
+        return await jinja2.render('unknown.html', **request.url.query)
 
     return app
 
