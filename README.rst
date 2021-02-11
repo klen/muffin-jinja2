@@ -63,19 +63,16 @@ Usage
 Options
 -------
 
-Format: Name -- Description (`default value`)
-
-**auto_reload** -- Auto reload changed templates (`False`)
-
-**cache_size** -- Cache templates (`50`)
-
-**extensions** -- Enable Jinja2 Extensions (`None`)
-
-**loader** -- Template loader (`FileSystemLoader`)
-
-**encoding** -- Default encoding for file loader (`utf-8`)
-
-**template_folders** -- List of template folders (`['templates']`)
+==================== ==================== ====================
+Name                 Default value        Description
+-------------------- -------------------- --------------------
+**auto_reload**      ``False``            Auto reload changed templates
+**cache_size**       ``50``               Cache templates
+**extensions**       ``None``             Enable Jinja2 Extensions (``None | list``)
+**loader**           ``FileSystemLoader`` Template loader
+**encoding**         ``utf-8``            Default encoding for file loader
+**template_folders** ``['templates']``    List of template folders
+==================== ==================== ====================
 
 
 You are able to provide the options when you are initiliazing the plugin:
