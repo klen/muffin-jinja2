@@ -90,7 +90,7 @@ Or setup it inside ``Muffin.Application`` config using the `jinja2_` prefix for 
 
    JINJA2_TEMPLATE_FOLDERS = ['tmpls']
 
-``Muffin.Application`` configuration options are case insensetive
+``Muffin.Application`` configuration options are case insensitive
 
 
 Tunning
