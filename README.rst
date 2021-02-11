@@ -82,7 +82,7 @@ You are able to provide the options when you are initiliazing the plugin:
     jinja2.init(app, template_folders=['src/templates'], auto_reload=True)
 
 
-Or setup it inside `Muffin.Application` config using the `jinja2_` prefix:
+Or setup it inside ``Muffin.Application`` config using the `jinja2_` prefix for example:
 
 .. code-block:: python
 
@@ -90,7 +90,7 @@ Or setup it inside `Muffin.Application` config using the `jinja2_` prefix:
 
    JINJA2_TEMPLATE_FOLDERS = ['tmpls']
 
-`Muffin.Application` configuration options are case insensetive
+``Muffin.Application`` configuration options are case insensetive
 
 
 Tunning
