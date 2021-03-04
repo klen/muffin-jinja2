@@ -60,7 +60,7 @@ upload: clean $(VIRTUAL_ENV)
 #  Development
 # =============
 
-$(VIRTUAL_ENV): setup.cfg
+$(VIRTUAL_ENV): $(CURDIR)/setup.cfg
 	@[ -d $(VIRTUAL_ENV) ] || python -m venv $(VIRTUAL_ENV)
 	@$(VIRTUAL_ENV)/bin/pip install -e .[tests,build]
 	@touch $(VIRTUAL_ENV)

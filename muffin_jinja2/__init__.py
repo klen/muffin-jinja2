@@ -1,11 +1,11 @@
-""" Muffin-Jinja2 -- Jinja2 template engine for Muffin framework. """
+"""Muffin-Jinja2 -- Jinja2 template engine for Muffin framework."""
 import typing as t
 import jinja2
-from json import dumps
+from inspect import isawaitable
 
 import muffin
 from muffin.plugin import BasePlugin, PluginException
-from muffin.utils import to_awaitable
+from asgi_tools._compat import json_dumps
 
 
 __version__ = "0.7.5"
@@ -19,7 +19,7 @@ F = t.TypeVar('F', bound=t.Callable[..., t.Any])
 
 class Plugin(BasePlugin):
 
-    """ The class is used to control the jinja2 integration to Muffin application. """
+    """The class is used to control the jinja2 integration to Muffin application."""
 
     name: str = 'jinja2'
     defaults = {
@@ -32,7 +32,7 @@ class Plugin(BasePlugin):
     }
 
     def __init__(self, app: muffin.Application = None, **options):
-        """ Initialize the plugin. """
+        """Initialize the plugin."""
         self.env: t.Optional[jinja2.Environment] = None
         self.providers: t.List[t.Callable[[], t.Awaitable]] = []
         self.receivers: t.List[t.Callable[[t.Union[str, jinja2.Template], t.Dict], t.Any]] = []
@@ -58,26 +58,26 @@ class Plugin(BasePlugin):
         @self.register
         @jinja2.contextfunction
         def debug(ctx, value=None):
-            """ Debug current context to template. """
+            """Debug current context to template."""
             return jinja2.filters.do_pprint(value is None and ctx or value)
 
         @self.filter
         def jsonify(obj):
-            return dumps(obj)
+            return json_dumps(obj)
 
     def context_processor(self, func: F) -> F:
-        """ Decorate a given function to use as a context processor.
+        """Decorate a given function to use as a context processor.
 
         ::
             @jinja2.context_processor
             def my_context():
                 return {...}
         """
-        self.providers.append(to_awaitable(func))
+        self.providers.append(func)
         return func
 
     def register(self, name: t.Union[F, str]) -> t.Callable[[F], F]:
-        """ Register function to globals. """
+        """Register function to globals."""
         if self.env is None:
             raise PluginException('The plugin must be installed to application.')
 
@@ -95,7 +95,7 @@ class Plugin(BasePlugin):
         return wrapper
 
     def filter(self, name: t.Union[F, str]) -> t.Callable[[F], F]:
-        """ Register function to filters. """
+        """Register function to filters."""
         if self.env is None:
             raise PluginException('The plugin must be installed to application.')
 
@@ -113,14 +113,16 @@ class Plugin(BasePlugin):
         return wrapper
 
     async def render(self, path: t.Union[str, jinja2.Template], **context) -> str:
-        """ Render a template with context. """
+        """Render a template with context."""
         if self.env is None:
             raise PluginException('Initialize the plugin first.')
 
         template = self.env.get_template(path)
         ctx = dict(self.env.globals)
         for provider in self.providers:
-            ctx_ = await provider()
+            ctx_ = provider()
+            if isawaitable(ctx_):
+                ctx_ = await ctx_
             ctx.update(ctx_)
         ctx.update(context)
 
