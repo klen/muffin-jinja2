@@ -34,7 +34,7 @@ class Plugin(BasePlugin):
     def __init__(self, app: muffin.Application = None, **options):
         """Initialize the plugin."""
         self.env: t.Optional[jinja2.Environment] = None
-        self.providers: t.List[t.Callable[[], t.Awaitable]] = []
+        self.providers: t.List[t.Callable] = []
         self.receivers: t.List[t.Callable[[t.Union[str, jinja2.Template], t.Dict], t.Any]] = []
 
         super().__init__(app, **options)
