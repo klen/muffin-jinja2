@@ -8,7 +8,7 @@ from muffin.plugin import BasePlugin, PluginException
 from asgi_tools._compat import json_dumps
 
 
-__version__ = "0.7.5"
+__version__ = "0.8.0"
 __project__ = "muffin-jinja2"
 __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
