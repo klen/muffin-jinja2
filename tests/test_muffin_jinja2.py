@@ -7,7 +7,7 @@ import jinja2
 def app():
     from muffin_jinja2 import Plugin as Jinja2
 
-    app = muffin.Application('jinja2', jinja2_template_folders=['tests'])
+    app = muffin.Application(name='jinja2', jinja2_template_folders=['tests'])
     jinja2 = Jinja2(app)
     assert jinja2.cfg.template_folders == ['tests']
 
