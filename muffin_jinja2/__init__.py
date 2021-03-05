@@ -43,15 +43,10 @@ class Plugin(BasePlugin):
         """Init the plugin for the given application."""
         super().setup(app, **options)
 
-        if not self.cfg.loader:
-            self.cfg.update(loader=jinja2.FileSystemLoader(
-                self.cfg.template_folders, encoding=self.cfg.encoding))
-
         self.env = jinja2.Environment(
             auto_reload=self.cfg.auto_reload,
             cache_size=self.cfg.cache_size,
             extensions=self.cfg.extensions,
-            loader=self.cfg.loader,
         )
         self.env.globals['app'] = app
 
@@ -64,6 +59,14 @@ class Plugin(BasePlugin):
         @self.filter
         def jsonify(obj):
             return json_dumps(obj)
+
+    def startup(self):
+        """Initialize the templates' loader."""
+        if not self.cfg.loader:
+            self.cfg.update(loader=jinja2.FileSystemLoader(
+                self.cfg.template_folders, encoding=self.cfg.encoding))
+
+        self.env.loader = self.cfg.loader
 
     def context_processor(self, func: F) -> F:
         """Decorate a given function to use as a context processor.

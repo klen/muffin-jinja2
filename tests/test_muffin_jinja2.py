@@ -1,6 +1,6 @@
+import jinja2
 import muffin
 import pytest
-import jinja2
 
 
 @pytest.fixture(scope='session')
@@ -39,23 +39,25 @@ def app():
 
 
 async def test_muffin_jinja2(app, client):
-    res = await client.get('/', query={'name': 'jinja2'})
-    assert res.status_code == 200
+    async with client.lifespan():
 
-    text = await res.text()
-    assert '<h1>Hello jinja2!</h1>' in text
-    assert '<p>8</p>' in text
-    assert '<p>3</p>' in text
-    assert '<b>done</b>' in text
-    assert '<i>yes</i>' in text
-    assert '<muffin.Application: jinja2>' in text
+        res = await client.get('/', query={'name': 'jinja2'})
+        assert res.status_code == 200
 
-    res = await client.get('/unknown')
-    assert res.status_code == 500
+        text = await res.text()
+        assert '<h1>Hello jinja2!</h1>' in text
+        assert '<p>8</p>' in text
+        assert '<p>3</p>' in text
+        assert '<b>done</b>' in text
+        assert '<i>yes</i>' in text
+        assert '<muffin.Application: jinja2>' in text
 
-    plugin = app.plugins['jinja2']
+        res = await client.get('/unknown')
+        assert res.status_code == 500
 
-    assert await plugin.render(jinja2.Template('OK'))
+        plugin = app.plugins['jinja2']
+
+        assert await plugin.render(jinja2.Template('OK'))
 
 
 # pylama:ignore=D
