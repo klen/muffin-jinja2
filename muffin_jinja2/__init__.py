@@ -3,8 +3,8 @@ import typing as t
 import jinja2
 from inspect import isawaitable
 
-import muffin
-from muffin.plugin import BasePlugin, PluginException
+from muffin import Application
+from muffin.plugins import BasePlugin, PluginException
 from asgi_tools._compat import json_dumps
 
 
@@ -31,7 +31,7 @@ class Plugin(BasePlugin):
         'template_folders': ['templates'],
     }
 
-    def __init__(self, app: muffin.Application = None, **options):
+    def __init__(self, app: Application = None, **options):
         """Initialize the plugin."""
         self.env: t.Optional[jinja2.Environment] = None
         self.providers: t.List[t.Callable] = []
@@ -39,7 +39,7 @@ class Plugin(BasePlugin):
 
         super().__init__(app, **options)
 
-    def setup(self, app: muffin.Application, **options):
+    def setup(self, app: Application, **options):
         """Init the plugin for the given application."""
         super().setup(app, **options)
 
