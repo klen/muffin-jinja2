@@ -41,4 +41,4 @@ jobs:
       if: steps.cache-env.outputs.cache-hit != 'true'
 
     - name: Test with pytest
-      run: pytest tests
+      run: env/bin/pytest tests
