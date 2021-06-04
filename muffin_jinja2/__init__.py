@@ -5,7 +5,6 @@ from inspect import isawaitable
 
 from muffin import Application
 from muffin.plugins import BasePlugin, PluginException
-from asgi_tools._compat import json_dumps
 
 
 __version__ = "0.10.6"
@@ -60,10 +59,6 @@ class Plugin(BasePlugin):
         def debug(ctx, value=None):
             """Debug current context to template."""
             return jinja2.filters.do_pprint(value is None and ctx or value)
-
-        @self.filter
-        def jsonify(obj):
-            return json_dumps(obj)
 
     def context_processor(self, func: F) -> F:
         """Decorate a given function to use as a context processor.
