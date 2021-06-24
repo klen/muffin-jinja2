@@ -30,6 +30,8 @@ class Plugin(BasePlugin):
         'template_folders': ['templates'],
     }
 
+    Error = jinja2.TemplateError
+
     def __init__(self, app: Application = None, **options):
         """Initialize the plugin."""
         self.env: t.Optional[jinja2.Environment] = None
