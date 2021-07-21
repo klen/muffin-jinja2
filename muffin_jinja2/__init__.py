@@ -7,7 +7,7 @@ from muffin import Application
 from muffin.plugins import BasePlugin, PluginException
 
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 __project__ = "muffin-jinja2"
 __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
