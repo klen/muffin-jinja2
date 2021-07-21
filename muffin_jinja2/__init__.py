@@ -57,7 +57,7 @@ class Plugin(BasePlugin):
         self.env.globals['app'] = app
 
         @self.register
-        @jinja2.contextfunction
+        @jinja2.pass_context
         def debug(ctx, value=None):
             """Debug current context to template."""
             return jinja2.filters.do_pprint(value is None and ctx or value)
