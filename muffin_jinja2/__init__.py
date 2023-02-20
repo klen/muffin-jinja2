@@ -13,7 +13,7 @@ try:
 except ImportError:
     from functools import cached_property  # py38
 
-__version__ = "1.6.1"
+__version__ = "1.6.2"
 __project__ = "muffin-jinja2"
 __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
