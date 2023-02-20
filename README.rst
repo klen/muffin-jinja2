@@ -100,27 +100,27 @@ Tunning
 
     # Register custom context processor
     # could be a function/coroutine
-    @jinja2.context_processor
+    @jinja2.add_context
     def custom_context():
         return { 'VAR': 'VALUE' }
 
     # Register a function into global context
-    @jinja2.register
+    @jinja2.add_global
     def sum(a, b):
         return a + b
 
     # Register a function with a different name
-    @jinja2.register('div')
+    @jinja2.add_global('div')
     def mod(a, b):
         return a // b
 
     # Register a filter
-    @jinja2.filter
+    @jinja2.add_filter
     def test(value, a, b=None):
         return a if value else b
 
     # Register a filter with a different name
-    @jinja2.filter('bool')
+    @jinja2.add_filter('bool')
     def boolean(value):
         return bool(value)
 
