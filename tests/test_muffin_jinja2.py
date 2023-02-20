@@ -6,40 +6,51 @@ import jinja2
 
 @pytest.fixture(scope="session")
 def app():
-    from muffin_jinja2 import Plugin as Jinja2
+    return muffin.Application(name="jinja2", jinja2_template_folders=["tests"])
 
-    app = muffin.Application(name="jinja2", jinja2_template_folders=["tests"])
-    jinja2 = Jinja2(app)
-    assert jinja2.cfg.template_folders == ["tests"]
 
-    @jinja2.add_context
+@pytest.fixture(scope="session")
+def jinja(app):
+    import muffin_jinja2
+
+    return muffin_jinja2.Plugin(app)
+
+
+@pytest.fixture(scope="session")
+def setup_web(app, jinja):
+    @jinja.add_context
     def global_context():
         return {"global": "done"}
 
-    @jinja2.add_global
+    @jinja.add_global
     def sum(a: int, b: int) -> int:
         return a + b
 
-    @jinja2.add_global("div")
+    @jinja.add_global("div")
     def _div_(a, b):
         return a // b
 
-    @jinja2.add_filter
+    @jinja.add_filter
     def test(test, a, b=None):
         return a if test else b
 
     @app.route("/")
     async def index(request):
-        return await jinja2.render("template.html", **request.url.query)
+        return await jinja.render("template.html", **request.url.query)
 
     @app.route("/unknown")
     async def unknown(request):
-        return await jinja2.render("unknown.html", **request.url.query)
-
-    return app
+        return await jinja.render("unknown.html", **request.url.query)
 
 
-async def test_muffin_jinja2(app, client):
+def test_base(jinja):
+    assert jinja
+    assert jinja.env
+    assert jinja.loader
+    assert jinja.cfg.template_folders == ["tests"]
+
+
+async def test_muffin_jinja2(setup_web, client, app):
     async with client.lifespan():
 
         res = await client.get("/", query={"name": "jinja2"})

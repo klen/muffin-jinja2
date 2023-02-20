@@ -1,6 +1,7 @@
 """Muffin-Jinja2 -- Jinja2 template engine for Muffin framework."""
+from functools import cached_property
 from inspect import isawaitable
-from typing import Any, Callable, Dict, List, Literal, Optional, TypeVar, Union, overload
+from typing import Any, Callable, Dict, List, Literal, Optional, TypeVar, Union, cast, overload
 from warnings import warn
 
 from muffin import Application
@@ -36,11 +37,22 @@ class Plugin(BasePlugin):
 
     def __init__(self, app: Optional[Application] = None, **options):
         """Initialize the plugin."""
-        self.env: Optional[jinja2.Environment] = None
+        self.__env__: Optional[jinja2.Environment] = None
         self.ctx_providers: List[Callable] = []
         self.receivers: List[Callable[[Union[str, jinja2.Template], Dict], Any]] = []
 
         super().__init__(app, **options)
+
+    @cached_property
+    def env(self) -> jinja2.Environment:
+        env = self.__env__
+        if env is None:
+            raise PluginException("The plugin must be installed to application.")
+        return env
+
+    @cached_property
+    def loader(self) -> jinja2.BaseLoader:
+        return cast(jinja2.BaseLoader, self.env.loader)
 
     def setup(self, app: Application, **options):
         """Init the plugin for the given application."""
@@ -53,13 +65,13 @@ class Plugin(BasePlugin):
                 )
             )
 
-        self.env = jinja2.Environment(
+        self.__env__ = jinja2.Environment(
             auto_reload=self.cfg.auto_reload,
             cache_size=self.cfg.cache_size,
             extensions=self.cfg.extensions,
             loader=self.cfg.loader,
         )
-        self.env.globals["app"] = app
+        self.__env__.globals["app"] = app
 
         @self.add_global
         @jinja2.pass_context
@@ -76,9 +88,6 @@ class Plugin(BasePlugin):
         ...
 
     def __register__(self, obj, type: TEnvParams = "globals"):
-        if self.env is None:
-            raise PluginException("The plugin must be installed to application.")
-
         def wrapper(func):
             env_name = func.__name__
             if isinstance(obj, str):
@@ -125,17 +134,7 @@ class Plugin(BasePlugin):
         self.ctx_providers.append(func)
         return func
 
-    async def render(self, path: Union[str, jinja2.Template], **context) -> str:
-        """Render a template with the given context.
-
-        :param path: Path to the template or a template object.
-        :param context: Context to render the template.
-
-        """
-        if self.env is None:
-            raise PluginException("Initialize the plugin first.")
-
-        template = self.env.get_template(path)
+    async def get_context(self, **context) -> Dict[str, Any]:
         ctx = dict(self.env.globals)
         for provider in self.ctx_providers:
             ctx_ = provider()
@@ -143,7 +142,18 @@ class Plugin(BasePlugin):
                 ctx_ = await ctx_
             ctx.update(ctx_)
         ctx.update(context)
+        return ctx
 
+    async def render(self, path: Union[str, jinja2.Template], **context) -> str:
+        """Render a template with the given context.
+
+        :param path: Path to the template or a template object.
+        :param context: Context to render the template.
+
+        """
+        env = self.env
+        template = env.get_template(path)
+        ctx = await self.get_context(**context)
         for reciever in self.receivers:
             reciever(path, ctx)
 
