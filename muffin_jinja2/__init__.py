@@ -10,7 +10,7 @@ import jinja2
 
 from ._compat import Literal, cached_property
 
-__version__ = "1.6.2"
+__version__ = "1.6.3"
 __project__ = "muffin-jinja2"
 __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
