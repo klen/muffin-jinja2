@@ -1,5 +1,4 @@
 """Muffin-Jinja2 -- Jinja2 template engine for Muffin framework."""
-from functools import cached_property
 from inspect import isawaitable
 from typing import Any, Callable, Dict, List, Literal, Optional, TypeVar, Union, cast, overload
 from warnings import warn
@@ -8,6 +7,11 @@ from muffin import Application
 from muffin.plugins import BasePlugin, PluginException
 
 import jinja2
+
+try:
+    from cached_property import cached_property  # py37
+except ImportError:
+    from functools import cached_property  # py38
 
 __version__ = "1.6.1"
 __project__ = "muffin-jinja2"
