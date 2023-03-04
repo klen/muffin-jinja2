@@ -1,6 +1,6 @@
 [project]
 name = "muffin-jinja2"
-version = "1.6.4"
+version = "1.7.0"
 description = "Support Jinja2 templates for Muffin Framework"
 readme = "README.rst"
 requires-python = ">=3.8"
