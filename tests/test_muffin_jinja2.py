@@ -1,7 +1,6 @@
+import jinja2
 import muffin
 import pytest
-
-import jinja2
 
 
 @pytest.fixture(scope="session")
@@ -17,13 +16,13 @@ def jinja(app):
 
 
 @pytest.fixture(scope="session")
-def setup_web(app, jinja):
+def _setup_web(app, jinja):
     @jinja.add_context
     def global_context():
         return {"global": "done"}
 
     @jinja.add_global
-    def sum(a: int, b: int) -> int:
+    def sum(a: int, b: int) -> int:  # noqa:
         return a + b
 
     @jinja.add_global("div")
@@ -50,7 +49,8 @@ def test_base(jinja):
     assert jinja.cfg.template_folders == ["tests"]
 
 
-async def test_muffin_jinja2(setup_web, client, app):
+@pytest.mark.usefixtures("_setup_web")
+async def test_muffin_jinja2(client, app):
     async with client.lifespan():
 
         res = await client.get("/", query={"name": "jinja2"})
@@ -62,7 +62,7 @@ async def test_muffin_jinja2(setup_web, client, app):
         assert "<p>3</p>" in text
         assert "<b>done</b>" in text
         assert "<i>yes</i>" in text
-        assert "<muffin.Application: jinja2>" in text
+        assert "muffin.Application: jinja2" in text
 
         res = await client.get("/unknown")
         assert res.status_code == 500
@@ -70,6 +70,3 @@ async def test_muffin_jinja2(setup_web, client, app):
         plugin = app.plugins["jinja2"]
 
         assert await plugin.render(jinja2.Template("OK"))
-
-
-# pylama:ignore=D

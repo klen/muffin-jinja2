@@ -1,0 +1,80 @@
+[project]
+name = "muffin-jinja2"
+version = "1.6.4"
+description = "Support Jinja2 templates for Muffin Framework"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = {"text" = "MIT License"}
+authors = [{ name = "Kirill Klenov", email = "horneds@gmail.com" }]
+keywords = ["asyncio", "trio", "asgi", "web", "muffin", "jinja", "jinja2"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Internet :: WWW/HTTP",
+  "Framework :: AsyncIO",
+  "Framework :: Trio",
+]
+dependencies = [
+  "muffin >= 0.92",
+  "jinja2 >= 3.1.1",
+]
+
+[project.urls]
+homepage = "https://github.com/klen/muffin-jinja2"
+repository = "https://github.com/klen/muffin-jinja2"
+
+[project.optional-dependencies]
+tests = [
+  "pytest",
+  "pytest-aio[curio,trio]",
+  "pytest-mypy",
+  "ruff",
+]
+dev = ["pre-commit", "refurb", "bump2version"]
+
+[tool.setuptools]
+packages = ['muffin_jinja2']
+
+[tool.setuptools.package-data]
+muffin_jinja2 = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "-xsv"
+log_cli = true
+
+[tool.mypy]
+packages = ["muffin_jinja2"]
+install_types = true
+non_interactive = true
+ignore_missing_imports = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py38,py39,py310,py311,pypy39
+
+[testenv]
+deps = -e .[tests]
+commands =
+	pytest --mypy tests
+
+[testenv:pypy39]
+deps = -e .[tests]
+commands =
+	pytest tests
+"""
+
+[tool.ruff]
+fix = true
+line-length = 100
+target-version = "py38"
+exclude = [".venv", "docs", "examples"]
+select = ["ALL"]
+ignore = ["D", "UP", "ANN", "DJ", "EM", "RSE", "SLF", "RET", "S101", "PLR2004", "PLR0912", "N804", "A003", "TRY003"]

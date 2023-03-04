@@ -1,20 +1,28 @@
 """Muffin-Jinja2 -- Jinja2 template engine for Muffin framework."""
+from __future__ import annotations
+
+from functools import cached_property
 from inspect import isawaitable
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 from warnings import warn
 
-from muffin import Application
-from muffin.plugins import BasePlugin, PluginException
-
 import jinja2
+from muffin.plugins import BasePlugin, PluginNotInstalledError
 
-from ._compat import Literal, cached_property
-
-__version__ = "1.6.4"
-__project__ = "muffin-jinja2"
-__author__ = "Kirill Klenov <horneds@gmail.com>"
-__license__ = "MIT"
-
+if TYPE_CHECKING:
+    from muffin import Application
 
 TVFn = TypeVar("TVFn", bound=Callable)
 TEnvParams = Literal["globals", "filters", "policies", "tests"]
@@ -48,7 +56,7 @@ class Plugin(BasePlugin):
     def env(self) -> jinja2.Environment:
         env = self.__env__
         if env is None:
-            raise PluginException("The plugin must be installed to application.")
+            raise PluginNotInstalledError
         return env
 
     @cached_property
@@ -62,8 +70,8 @@ class Plugin(BasePlugin):
         if not self.cfg.loader:
             self.cfg.update(
                 loader=jinja2.FileSystemLoader(
-                    self.cfg.template_folders, encoding=self.cfg.encoding
-                )
+                    self.cfg.template_folders, encoding=self.cfg.encoding,
+                ),
             )
 
         self.__env__ = jinja2.Environment(
@@ -71,6 +79,7 @@ class Plugin(BasePlugin):
             cache_size=self.cfg.cache_size,
             extensions=self.cfg.extensions,
             loader=self.cfg.loader,
+            autoescape=jinja2.select_autoescape(["html", "xml"]),
         )
         self.__env__.globals["app"] = app
 
@@ -81,19 +90,19 @@ class Plugin(BasePlugin):
             return jinja2.filters.do_pprint(value is None and ctx or value)
 
     @overload
-    def __register__(self, obj: TVFn, type: TEnvParams) -> TVFn:
+    def __register__(self, obj: TVFn, jtype: TEnvParams) -> TVFn:
         ...
 
     @overload
-    def __register__(self, obj: str, type: TEnvParams) -> Callable[[TVFn], TVFn]:
+    def __register__(self, obj: str, jtype: TEnvParams) -> Callable[[TVFn], TVFn]:
         ...
 
-    def __register__(self, obj, type: TEnvParams = "globals"):
+    def __register__(self, obj, jtype: TEnvParams = "globals"):
         def wrapper(func):
             env_name = func.__name__
             if isinstance(obj, str):
                 env_name = obj
-            ctx = getattr(self.env, type)
+            ctx = getattr(self.env, jtype)
             ctx[env_name] = func
             return func
 
