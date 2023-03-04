@@ -60,8 +60,8 @@ class Plugin(BasePlugin):
         return env
 
     @cached_property
-    def loader(self) -> jinja2.BaseLoader:
-        return cast(jinja2.BaseLoader, self.env.loader)
+    def loader(self) -> jinja2.FileSystemLoader:
+        return cast(jinja2.FileSystemLoader, self.env.loader)
 
     def setup(self, app: Application, **options):
         """Init the plugin for the given application."""
@@ -70,7 +70,8 @@ class Plugin(BasePlugin):
         if not self.cfg.loader:
             self.cfg.update(
                 loader=jinja2.FileSystemLoader(
-                    self.cfg.template_folders, encoding=self.cfg.encoding,
+                    self.cfg.template_folders,
+                    encoding=self.cfg.encoding,
                 ),
             )
 

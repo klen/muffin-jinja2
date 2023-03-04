@@ -24,7 +24,7 @@ Muffin-Jinja2
 Requirements
 =============
 
-- python >= 3.7
+- python >= 3.8
 
 .. _installation:
 
