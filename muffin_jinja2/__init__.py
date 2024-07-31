@@ -7,6 +7,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Literal,
     Optional,
     TypeVar,
@@ -31,7 +32,7 @@ class Plugin(BasePlugin):
     """The class is used to control the jinja2 integration to Muffin application."""
 
     name: str = "jinja2"
-    defaults = {
+    defaults: ClassVar = {
         "auto_reload": False,
         "cache_size": 50,
         "extensions": (),
@@ -172,15 +173,23 @@ class Plugin(BasePlugin):
 
     def register(self, obj):
         """Register function to globals."""
-        warn("Use `add_register` instead of `register`", DeprecationWarning, 2)
+        warn(
+            "Use `add_register` instead of `register`",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.__register__(obj, "globals")
 
     def filter(self, obj):
         """Register function to filters."""
-        warn("Use `add_filter` instead of `filter`", DeprecationWarning, 2)
+        warn("Use `add_filter` instead of `filter`", DeprecationWarning, stacklevel=2)
         return self.__register__(obj, "filters")
 
     def context_processor(self, func):
         """Decorate a given function to use as a context processor."""
-        warn("Use `add_context` instead of `context_processor`", DeprecationWarning, 2)
+        warn(
+            "Use `add_context` instead of `context_processor`",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.add_context(func)
