@@ -7,8 +7,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Literal,
     Optional,
     TypeVar,
@@ -47,8 +45,8 @@ class Plugin(BasePlugin):
     def __init__(self, app: Optional[Application] = None, **options):
         """Initialize the plugin."""
         self.__env__: Optional[jinja2.Environment] = None
-        self.ctx_providers: List[Callable] = []
-        self.receivers: List[Callable[[Union[str, jinja2.Template], Dict], Any]] = []
+        self.ctx_providers: list[Callable] = []
+        self.receivers: list[Callable[[Union[str, jinja2.Template], dict], Any]] = []
 
         super().__init__(app, **options)
 
@@ -145,7 +143,7 @@ class Plugin(BasePlugin):
         self.ctx_providers.append(func)
         return func
 
-    async def get_context(self, **context) -> Dict[str, Any]:
+    async def get_context(self, **context) -> dict[str, Any]:
         ctx = dict(self.env.globals)
         for provider in self.ctx_providers:
             ctx_ = provider()
