@@ -69,3 +69,19 @@ async def test_muffin_jinja2(client, app):
         plugin = app.plugins["jinja2"]
 
         assert await plugin.render(jinja2.Template("OK"))
+
+
+async def test_receivers(jinja):
+    received = []
+
+    def receiver(path, ctx):
+        received.append(path)
+        ctx["value"] = "done"
+
+    jinja.receivers.append(receiver)
+    try:
+        assert await jinja.render(jinja2.Template("{{ value }}")) == "done"
+    finally:
+        jinja.receivers.remove(receiver)
+
+    assert received
