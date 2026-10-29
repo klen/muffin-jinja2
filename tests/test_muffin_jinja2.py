@@ -2,6 +2,8 @@ import jinja2
 import muffin
 import pytest
 
+import muffin_jinja2
+
 
 @pytest.fixture(scope="session")
 def app():
@@ -22,7 +24,7 @@ def _setup_web(app, jinja):
         return {"global": "done"}
 
     @jinja.add_global
-    def sum(a: int, b: int) -> int:  # noqa:
+    def sum(a: int, b: int) -> int:  # noqa: A001
         return a + b
 
     @jinja.add_global("div")
@@ -52,7 +54,6 @@ def test_base(jinja):
 @pytest.mark.usefixtures("_setup_web")
 async def test_muffin_jinja2(client, app):
     async with client.lifespan():
-
         res = await client.get("/", query={"name": "jinja2"})
         assert res.status_code == 200
 
@@ -70,3 +71,31 @@ async def test_muffin_jinja2(client, app):
         plugin = app.plugins["jinja2"]
 
         assert await plugin.render(jinja2.Template("OK"))
+
+
+async def test_receivers(jinja):
+    received = []
+
+    def receiver(path, ctx):
+        received.append(path)
+        ctx["value"] = "done"
+
+    jinja.receivers.append(receiver)
+    try:
+        assert await jinja.render(jinja2.Template("{{ value }}")) == "done"
+    finally:
+        jinja.receivers.remove(receiver)
+
+    assert received
+
+
+def test_setup_returns():
+    app = muffin.Application(name="setup")
+
+    plugin = muffin_jinja2.Plugin()
+    assert plugin.setup(app) is True
+    assert app.plugins["jinja2"] is plugin
+
+    disabled = muffin_jinja2.Plugin()
+    assert disabled.setup(app, disabled=True) is False
+    assert disabled not in app.plugins.values()
