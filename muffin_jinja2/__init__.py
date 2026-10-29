@@ -172,7 +172,7 @@ class Plugin(BasePlugin):
     def register(self, obj):
         """Register function to globals."""
         warn(
-            "Use `add_register` instead of `register`",
+            "Use `add_global` instead of `register`",
             DeprecationWarning,
             stacklevel=2,
         )
