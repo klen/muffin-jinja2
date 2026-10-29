@@ -1,4 +1,5 @@
 """Muffin-Jinja2 -- Jinja2 template engine for Muffin framework."""
+
 from __future__ import annotations
 
 from functools import cached_property
@@ -28,7 +29,6 @@ TEnvParams = Literal["globals", "filters", "policies", "tests"]
 
 
 class Plugin(BasePlugin):
-
     """The class is used to control the jinja2 integration to Muffin application."""
 
     name: str = "jinja2"
@@ -60,9 +60,9 @@ class Plugin(BasePlugin):
 
     @cached_property
     def loader(self) -> jinja2.FileSystemLoader:
-        return cast(jinja2.FileSystemLoader, self.env.loader)
+        return cast("jinja2.FileSystemLoader", self.env.loader)
 
-    def setup(self, app: Application, **options):
+    def setup(self, app: Application, **options):  # pyrefly: ignore[bad-override]
         """Init the plugin for the given application."""
         super().setup(app, **options)
 
@@ -81,21 +81,19 @@ class Plugin(BasePlugin):
             loader=self.cfg.loader,
             autoescape=jinja2.select_autoescape(["html", "xml"]),
         )
-        self.__env__.globals["app"] = app
+        cast("dict[str, Any]", self.__env__.globals)["app"] = app
 
         @self.add_global
         @jinja2.pass_context
         def debug(ctx, value=None):
             """Debug current context to template."""
-            return jinja2.filters.do_pprint(value is None and ctx or value)
+            return jinja2.filters.do_pprint((value is None and ctx) or value)
 
     @overload
-    def __register__(self, obj: TVFn, jtype: TEnvParams) -> TVFn:
-        ...
+    def __register__(self, obj: TVFn, jtype: TEnvParams) -> TVFn: ...
 
     @overload
-    def __register__(self, obj: str, jtype: TEnvParams) -> Callable[[TVFn], TVFn]:
-        ...
+    def __register__(self, obj: str, jtype: TEnvParams) -> Callable[[TVFn], TVFn]: ...
 
     def __register__(self, obj, jtype: TEnvParams = "globals"):
         def wrapper(func):

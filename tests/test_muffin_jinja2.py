@@ -22,7 +22,7 @@ def _setup_web(app, jinja):
         return {"global": "done"}
 
     @jinja.add_global
-    def sum(a: int, b: int) -> int:  # noqa:
+    def sum(a: int, b: int) -> int:  # noqa: A001
         return a + b
 
     @jinja.add_global("div")
@@ -52,7 +52,6 @@ def test_base(jinja):
 @pytest.mark.usefixtures("_setup_web")
 async def test_muffin_jinja2(client, app):
     async with client.lifespan():
-
         res = await client.get("/", query={"name": "jinja2"})
         assert res.status_code == 200
 
