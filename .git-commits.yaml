@@ -2,13 +2,15 @@
 
 convention:
   commitTypes:
+  - build
+  - chore
+  - ci
   - feat
   - fix
   - perf
   - refactor
   - style
   - test
-  - build
   - ops
   - docs
   - merge
