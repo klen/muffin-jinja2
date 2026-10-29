@@ -62,9 +62,9 @@ class Plugin(BasePlugin):
     def loader(self) -> jinja2.FileSystemLoader:
         return cast("jinja2.FileSystemLoader", self.env.loader)
 
-    def setup(self, app: Application, **options):  # pyrefly: ignore[bad-override]
+    def setup(self, app: Application, *, name: str | None = None, **options) -> bool:
         """Init the plugin for the given application."""
-        super().setup(app, **options)
+        initialized = super().setup(app, name=name, **options)
 
         if not self.cfg.loader:
             self.cfg.update(
@@ -88,6 +88,8 @@ class Plugin(BasePlugin):
         def debug(ctx, value=None):
             """Debug current context to template."""
             return jinja2.filters.do_pprint((value is None and ctx) or value)
+
+        return initialized
 
     @overload
     def __register__(self, obj: TVFn, jtype: TEnvParams) -> TVFn: ...

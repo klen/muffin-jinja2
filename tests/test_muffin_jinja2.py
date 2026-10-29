@@ -2,6 +2,8 @@ import jinja2
 import muffin
 import pytest
 
+import muffin_jinja2
+
 
 @pytest.fixture(scope="session")
 def app():
@@ -85,3 +87,15 @@ async def test_receivers(jinja):
         jinja.receivers.remove(receiver)
 
     assert received
+
+
+def test_setup_returns():
+    app = muffin.Application(name="setup")
+
+    plugin = muffin_jinja2.Plugin()
+    assert plugin.setup(app) is True
+    assert app.plugins["jinja2"] is plugin
+
+    disabled = muffin_jinja2.Plugin()
+    assert disabled.setup(app, disabled=True) is False
+    assert disabled not in app.plugins.values()
