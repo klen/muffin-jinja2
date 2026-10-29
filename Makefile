@@ -14,7 +14,7 @@ clean:
 	rm -rf build/ dist/ *.egg-info
 	find $(CURDIR) -name "*.py[co]" -delete
 	find $(CURDIR) -name "*.orig" -delete
-	find $(CURDIR)/$(MODULE) -name "__pycache__" | xargs rm -rf
+	find $(CURDIR)/$(PACKAGE) -name "__pycache__" | xargs rm -rf
 
 # =============
 #  Development
