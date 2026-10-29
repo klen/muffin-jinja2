@@ -403,8 +403,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "jinja2" },
-    { name = "muffin" },
+    { name = "jinja2", specifier = ">=3.0" },
+    { name = "muffin", specifier = ">=3" },
 ]
 
 [package.metadata.requires-dev]

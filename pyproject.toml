@@ -24,8 +24,8 @@ classifiers = [
   "Framework :: Trio",
 ]
 dependencies = [
-  "jinja2",
-  "muffin",
+  "jinja2>=3.0",
+  "muffin>=3",
 ]
 
 [project.urls]

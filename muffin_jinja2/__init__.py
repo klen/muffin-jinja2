@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from functools import cached_property
 from inspect import isawaitable
 from typing import (
     TYPE_CHECKING,
@@ -19,13 +18,14 @@ from typing import (
 from warnings import warn
 
 import jinja2
+import jinja2.filters
 from muffin.plugins import BasePlugin, PluginNotInstalledError
 
 if TYPE_CHECKING:
     from muffin import Application
 
 TVFn = TypeVar("TVFn", bound=Callable)
-TEnvParams = Literal["globals", "filters", "policies", "tests"]
+TEnvParams = Literal["globals", "filters"]
 
 
 class Plugin(BasePlugin):
@@ -34,7 +34,7 @@ class Plugin(BasePlugin):
     name: str = "jinja2"
     defaults: ClassVar = {
         "auto_reload": False,
-        "cache_size": 50,
+        "cache_size": 400,
         "extensions": (),
         "loader": None,
         "encoding": "utf-8",
@@ -51,35 +51,31 @@ class Plugin(BasePlugin):
 
         super().__init__(app, **options)
 
-    @cached_property
+    @property
     def env(self) -> jinja2.Environment:
         env = self.__env__
         if env is None:
             raise PluginNotInstalledError
         return env
 
-    @cached_property
-    def loader(self) -> jinja2.FileSystemLoader:
-        return cast("jinja2.FileSystemLoader", self.env.loader)
+    @property
+    def loader(self) -> jinja2.BaseLoader:
+        return cast("jinja2.BaseLoader", self.env.loader)
 
     def setup(self, app: Application, *, name: str | None = None, **options) -> bool:
         """Init the plugin for the given application."""
         initialized = super().setup(app, name=name, **options)
-
-        if not self.cfg.loader:
-            self.cfg.update(
-                loader=jinja2.FileSystemLoader(
-                    self.cfg.template_folders,
-                    encoding=self.cfg.encoding,
-                ),
-            )
+        loader = self.cfg.loader or jinja2.FileSystemLoader(
+            self.cfg.template_folders,
+            encoding=self.cfg.encoding,
+        )
 
         self.__env__ = jinja2.Environment(
             auto_reload=self.cfg.auto_reload,
             cache_size=self.cfg.cache_size,
             extensions=self.cfg.extensions,
-            loader=self.cfg.loader,
-            autoescape=jinja2.select_autoescape(["html", "xml"]),
+            loader=loader,
+            autoescape=jinja2.select_autoescape(),
         )
         cast("dict[str, Any]", self.__env__.globals)["app"] = app
 

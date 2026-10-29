@@ -71,7 +71,7 @@ Options
 Name                 Default value        Description
 -------------------- -------------------- --------------------
 **auto_reload**      ``False``            Auto reload changed templates
-**cache_size**       ``50``               Cache templates
+**cache_size**       ``400``              Cache templates
 **extensions**       ``()``               Enable Jinja2 Extensions (``list | tuple``)
 **loader**           ``None``             Template loader, a ``FileSystemLoader``
                                           for ``template_folders`` is created by default

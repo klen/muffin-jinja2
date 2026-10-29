@@ -99,3 +99,55 @@ def test_setup_returns():
     disabled = muffin_jinja2.Plugin()
     assert disabled.setup(app, disabled=True) is False
     assert disabled not in app.plugins.values()
+
+
+async def test_async_context(jinja):
+    async def provider():
+        return {"asy": "done"}
+
+    jinja.ctx_providers.append(provider)
+    try:
+        assert await jinja.render(jinja2.Template("{{ asy }}")) == "done"
+    finally:
+        jinja.ctx_providers.remove(provider)
+
+
+async def test_autoescape(tmp_path):
+    (tmp_path / "page.html").write_text("{{ value }}")
+    (tmp_path / "page.htm").write_text("{{ value }}")
+
+    plugin = muffin_jinja2.Plugin()
+    plugin.setup(muffin.Application(name="autoescape"), template_folders=[str(tmp_path)])
+
+    value = "<script>alert(1)</script>"
+    escaped = "&lt;script&gt;alert(1)&lt;/script&gt;"
+    assert await plugin.render("page.html", value=value) == escaped
+    assert await plugin.render("page.htm", value=value) == escaped
+
+
+async def test_setup_twice(tmp_path):
+    (tmp_path / "a").mkdir()
+    (tmp_path / "b").mkdir()
+    (tmp_path / "a" / "x.html").write_text("A")
+    (tmp_path / "b" / "x.html").write_text("B")
+
+    app_a = muffin.Application(name="first")
+    app_b = muffin.Application(name="second")
+    plugin = muffin_jinja2.Plugin()
+
+    plugin.setup(app_a, template_folders=[str(tmp_path / "a")])
+    assert await plugin.render("x.html") == "A"
+
+    plugin.setup(app_b, template_folders=[str(tmp_path / "b")])
+    assert await plugin.render("x.html") == "B"
+    assert plugin.env.globals["app"] is app_b
+
+
+async def test_custom_loader():
+    loader = jinja2.DictLoader({"x.html": "{{ value }}"})
+
+    plugin = muffin_jinja2.Plugin()
+    plugin.setup(muffin.Application(name="custom"), loader=loader)
+
+    assert plugin.loader is loader
+    assert await plugin.render("x.html", value="ok") == "ok"
