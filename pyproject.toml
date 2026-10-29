@@ -1,6 +1,6 @@
 [project]
 name = "muffin-jinja2"
-version = "1.8.1"
+version = "1.9.0"
 description = "Support Jinja2 templates for Muffin Framework"
 authors = [{ name = "Kirill Klenov", email = "horneds@gmail.com" }]
 requires-python = ">=3.11,<4"
@@ -106,7 +106,7 @@ ignore = [
 ]
 
 [tool.bumpversion]
-current_version = "1.8.1"
+current_version = "1.9.0"
 commit = false
 tag = false
 
