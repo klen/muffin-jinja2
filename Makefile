@@ -58,7 +58,7 @@ MANAGER	?= uv
 # target: release - Bump version
 release:
 	@echo "Starting release process (bumping $(RELEASE) version)..."
-	@git checkout master
+	@git checkout main
 	@git pull
 	@git checkout develop
 	@git pull
@@ -71,17 +71,17 @@ release:
 		{ \
 			printf 'build(release): %s\n\n' "$$VERSION"; \
 			printf 'Changes:\n\n'; \
-			git log --oneline --pretty=format:'%s [%an]' master..develop | grep -Evi 'github|^Merge' || true; \
+			git log --oneline --pretty=format:'%s [%an]' main..develop | grep -Evi 'github|^Merge' || true; \
 		} | git commit -a -F -
 	@echo "Merging changes between branches..."
-	@git checkout master
+	@git checkout main
 	@git merge --ff-only develop
 	@VERSION=`$(MANAGER) version --short`; \
-		git push origin master; \
+		git push origin main; \
 		git tag -a "$$VERSION" -m "$$VERSION"; \
 		git push origin "$$VERSION"
 	@git checkout develop
-	@git merge --ff-only master
+	@git merge --ff-only main
 	@git push origin develop
 	@echo "Release process complete for `$(MANAGER) version --short`"
 
