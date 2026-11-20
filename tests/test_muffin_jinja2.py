@@ -89,6 +89,12 @@ async def test_receivers(jinja):
     assert received
 
 
+def test_add_template_folder(jinja, tmp_path):
+    (tmp_path / "extra.html").write_text("extra", encoding="utf-8")
+    jinja.add_template_folder(tmp_path)
+    assert jinja.env.get_template("extra.html").render() == "extra"
+
+
 def test_setup_returns():
     app = muffin.Application(name="setup")
 

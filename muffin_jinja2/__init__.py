@@ -6,12 +6,12 @@ from inspect import isawaitable
 from typing import (
     TYPE_CHECKING,
     Any,
+    Awaitable,
     Callable,
     ClassVar,
     Literal,
-    Optional,
+    Mapping,
     TypeVar,
-    Union,
     cast,
     overload,
 )
@@ -22,17 +22,22 @@ import jinja2.filters
 from muffin.plugins import BasePlugin, PluginNotInstalledError
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from muffin import Application
 
-TVFn = TypeVar("TVFn", bound=Callable)
+TVFn = TypeVar("TVFn", bound=Callable[..., Any])
 TEnvParams = Literal["globals", "filters"]
+TContext = Mapping[str, Any]
+TContextProvider = Callable[[], TContext | Awaitable[TContext]]
+TReceiver = Callable[[str | jinja2.Template, dict[str, Any]], Any]
 
 
 class Plugin(BasePlugin):
     """The class is used to control the jinja2 integration to Muffin application."""
 
     name: str = "jinja2"
-    defaults: ClassVar = {
+    defaults: ClassVar[Mapping[str, Any]] = {
         "auto_reload": False,
         "cache_size": 400,
         "extensions": (),
@@ -41,13 +46,13 @@ class Plugin(BasePlugin):
         "template_folders": ["templates"],
     }
 
-    Error = jinja2.TemplateError
+    Error: ClassVar[type[jinja2.TemplateError]] = jinja2.TemplateError
 
-    def __init__(self, app: Optional[Application] = None, **options):
+    def __init__(self, app: Application | None = None, **options: Any) -> None:
         """Initialize the plugin."""
-        self.__env__: Optional[jinja2.Environment] = None
-        self.ctx_providers: list[Callable] = []
-        self.receivers: list[Callable[[Union[str, jinja2.Template], dict], Any]] = []
+        self.__env__: jinja2.Environment | None = None
+        self.ctx_providers: list[TContextProvider] = []
+        self.receivers: list[TReceiver] = []
 
         super().__init__(app, **options)
 
@@ -62,7 +67,7 @@ class Plugin(BasePlugin):
     def loader(self) -> jinja2.BaseLoader:
         return cast("jinja2.BaseLoader", self.env.loader)
 
-    def setup(self, app: Application, *, name: str | None = None, **options) -> bool:
+    def setup(self, app: Application, *, name: str | None = None, **options: Any) -> bool:
         """Init the plugin for the given application."""
         initialized = super().setup(app, name=name, **options)
         loader = self.cfg.loader or jinja2.FileSystemLoader(
@@ -77,27 +82,28 @@ class Plugin(BasePlugin):
             loader=loader,
             autoescape=jinja2.select_autoescape(),
         )
+        # jinja2 does not annotate Environment.globals
         cast("dict[str, Any]", self.__env__.globals)["app"] = app
 
         @self.add_global
         @jinja2.pass_context
-        def debug(ctx, value=None):
+        def debug(ctx: jinja2.runtime.Context, value: Any = None) -> str:
             """Debug current context to template."""
             return jinja2.filters.do_pprint((value is None and ctx) or value)
 
         return initialized
 
     @overload
-    def __register__(self, obj: TVFn, jtype: TEnvParams) -> TVFn: ...
+    def __register__(self, obj: TVFn, jtype: TEnvParams = "globals") -> TVFn: ...
 
     @overload
-    def __register__(self, obj: str, jtype: TEnvParams) -> Callable[[TVFn], TVFn]: ...
+    def __register__(self, obj: str, jtype: TEnvParams = "globals") -> Callable[[TVFn], TVFn]: ...
 
-    def __register__(self, obj, jtype: TEnvParams = "globals"):
-        def wrapper(func):
-            env_name = func.__name__
-            if isinstance(obj, str):
-                env_name = obj
+    def __register__(
+        self, obj: TVFn | str, jtype: TEnvParams = "globals"
+    ) -> TVFn | Callable[[TVFn], TVFn]:
+        def wrapper(func: TVFn) -> TVFn:
+            env_name = obj if isinstance(obj, str) else func.__name__
             ctx = getattr(self.env, jtype)
             ctx[env_name] = func
             return func
@@ -107,7 +113,13 @@ class Plugin(BasePlugin):
 
         return wrapper
 
-    def add_global(self, obj):
+    @overload
+    def add_global(self, obj: TVFn) -> TVFn: ...
+
+    @overload
+    def add_global(self, obj: str) -> Callable[[TVFn], TVFn]: ...
+
+    def add_global(self, obj: TVFn | str) -> TVFn | Callable[[TVFn], TVFn]:
         """Register function to globals.
 
         ::
@@ -118,7 +130,13 @@ class Plugin(BasePlugin):
         """
         return self.__register__(obj, "globals")
 
-    def add_filter(self, obj):
+    @overload
+    def add_filter(self, obj: TVFn) -> TVFn: ...
+
+    @overload
+    def add_filter(self, obj: str) -> Callable[[TVFn], TVFn]: ...
+
+    def add_filter(self, obj: TVFn | str) -> TVFn | Callable[[TVFn], TVFn]:
         """Register function to filters.
 
         ::
@@ -140,7 +158,21 @@ class Plugin(BasePlugin):
         self.ctx_providers.append(func)
         return func
 
-    async def get_context(self, **context) -> dict[str, Any]:
+    def add_template_folder(self, *paths: str | Path) -> None:
+        """Append folders to the template search path.
+
+        ::
+            jinja.add_template_folder(Path(__file__).parent)
+        """
+        if not isinstance(self.env.loader, jinja2.FileSystemLoader):
+            raise jinja2.TemplateError(
+                f"{type(self.env.loader).__name__} doesn't support search paths"
+            )
+        folder_paths = [str(path) for path in paths]
+        self.cfg.template_folders.extend(folder_paths)  # survive env rebuild in setup()
+        self.env.loader.searchpath.extend(folder_paths)
+
+    async def get_context(self, **context: Any) -> dict[str, Any]:
         ctx = dict(self.env.globals)
         for provider in self.ctx_providers:
             ctx_ = provider()
@@ -150,7 +182,7 @@ class Plugin(BasePlugin):
         ctx.update(context)
         return ctx
 
-    async def render(self, path: Union[str, jinja2.Template], **context) -> str:
+    async def render(self, path: str | jinja2.Template, **context: Any) -> str:
         """Render a template with the given context.
 
         :param path: Path to the template or a template object.
@@ -167,7 +199,7 @@ class Plugin(BasePlugin):
 
     # Depricated methods and properties
 
-    def register(self, obj):
+    def register(self, obj: TVFn | str) -> TVFn | Callable[[TVFn], TVFn]:
         """Register function to globals."""
         warn(
             "Use `add_global` instead of `register`",
@@ -176,12 +208,12 @@ class Plugin(BasePlugin):
         )
         return self.__register__(obj, "globals")
 
-    def filter(self, obj):
+    def filter(self, obj: TVFn | str) -> TVFn | Callable[[TVFn], TVFn]:
         """Register function to filters."""
         warn("Use `add_filter` instead of `filter`", DeprecationWarning, stacklevel=2)
         return self.__register__(obj, "filters")
 
-    def context_processor(self, func):
+    def context_processor(self, func: TVFn) -> TVFn:
         """Decorate a given function to use as a context processor."""
         warn(
             "Use `add_context` instead of `context_processor`",
