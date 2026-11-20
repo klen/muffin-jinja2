@@ -38,3 +38,11 @@ jobs:
 
       - name: Test with pytest
         run: uv run pytest
+
+  # Stable name to require in branch protection: matrix jobs are named per version.
+  tests-ok:
+    needs: [tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: test '${{ needs.tests.result }}' = success
