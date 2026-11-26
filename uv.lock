@@ -370,16 +370,16 @@ wheels = [
 
 [[package]]
 name = "muffin"
-version = "3.3.0"
+version = "3.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgi-tools" },
     { name = "modconfig" },
     { name = "orjson" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f4/1d/9e0b641032025dab7d52fe25dd5ae8ef8b8a33197fc7f1d0baddee024e84/muffin-3.3.0.tar.gz", hash = "sha256:fb4ad199dd7748e20af4554bf89ab99685718e19a0b1ebcb73bfb1d1688c4214", size = 13991, upload-time = "2026-11-19T09:03:49.772Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/32/10/882670237497440b10744aa462eb58d7265525b72421071b18d740f67a19/muffin-3.5.1.tar.gz", hash = "sha256:1f87666cb1fc05c7f23361085dd8b09f26387056fb049be714fd49633d51a3fd", size = 14481, upload-time = "2026-11-23T12:37:49.745Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/63/c1/14d7607bacac666d8f6c5d8223a35295154b2030f60a920b45621ba0a5e4/muffin-3.3.0-py3-none-any.whl", hash = "sha256:162c92230101267c34e9dbfd6a1256fc2ebc3990a5dfb6e57cb6d734f6f584fa", size = 17332, upload-time = "2026-11-19T09:03:48.407Z" },
+    { url = "https://files.pythonhosted.org/packages/97/2e/ba9dea5f84e60a38f4b66fa98fac7dedad52999cc9993f0f438cf910a6c6/muffin-3.5.1-py3-none-any.whl", hash = "sha256:71cf031eaac4da823187b43fc17cdbeab026096ca7beb4ccd19aecfe8217da66", size = 17757, upload-time = "2026-11-23T12:37:48.746Z" },
 ]
 
 [[package]]
